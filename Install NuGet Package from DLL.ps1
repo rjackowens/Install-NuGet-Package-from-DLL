@@ -12,7 +12,6 @@ $DLL_Objects = Get-ChildItem -Path $DLL_Folder -Filter *.dll | Select-Object Nam
 
 # Building Array of Objects to Export
 $DLL_Objects | ForEach-Object {
-
     $DLL_Location = $DLL_Folder + $_.Name
     $DLL_Version = (Get-Item -Path $DLL_Location).VersionInfo.ProductVersion
     
@@ -28,9 +27,8 @@ $CSV_Results = Import-Csv -Path  $CSV_Folder
 
 # Adding Name and Version Parameters to Nuget.exe
 function Nuget-Install {
-
     Param ([string]$Name, [string]$Version)
-
+    
     $Folder_Path = "C:\"
     $Nuget = $Folder_Path + "nuget.exe install "
     $Package_Name = $Name
@@ -41,9 +39,11 @@ function Nuget-Install {
 
     $Full_Command = $Nuget + $Package_Name + " -version " + $Package_Version
 
-    Invoke-Expression $Full_Command
-
+    Invoke-Expression ($Full_Command) 2>&1 # Adds stderror to console
+        if ($lastexitcode -eq 1) {
+            Write-Host $Name $Version "does not exist in NuGet" -ForegroundColor Red      
     }
+}
 
 $CSV_Results | ForEach-Object {
 
