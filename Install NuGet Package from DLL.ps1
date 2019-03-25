@@ -1,8 +1,8 @@
-﻿$DLL_Folder = Read-Host "Enter folder location of .DLL files" 
+$DLL_Folder = Read-Host "Enter folder location of .DLL files" 
 $CSV_Folder = "C:\Users\" + $env:username + "\Documents\Results.csv"
 
 # Adds \ to End of Folder
-if ($DLL_Folder.EndsWith("\") -eq $false){
+if ($DLL_Folder.EndsWith("\") -eq $false) {
     $DLL_Folder = $DLL_Folder + "\"
     }
 
@@ -26,27 +26,20 @@ $All_Objects | Export-Csv -Path $CSV_Folder -NoTypeInformation
 $CSV_Results = Import-Csv -Path  $CSV_Folder
 
 # Adding Name and Version Parameters to Nuget.exe
-function Nuget-Install {
+function NuGet-Install {
     Param ([string]$Name, [string]$Version)
     
-    $Folder_Path = "C:\"
-    $Nuget = $Folder_Path + "nuget.exe install "
-    $Package_Name = $Name
-    $Package_Version = $Version
+    $NuGet = "C:\nuget.exe install "
+    Set-Location "C:\Packages" # Package Save Location
 
-    # Package Save Location
-    Set-Location "c:\Packages"
+    $Run_NuGet = $NuGet + $Name + " -version " + $Version
 
-    $Full_Command = $Nuget + $Package_Name + " -version " + $Package_Version
-
-    Invoke-Expression ($Full_Command) 2>&1 # Adds stderror to console
+    Invoke-Expression ($Run_NuGet) 2>&1 # Adds stderror to console
         if ($lastexitcode -eq 1) {
             Write-Host $Name $Version "does not exist in NuGet" -ForegroundColor Red      
     }
 }
 
 $CSV_Results | ForEach-Object {
-
-    Nuget-Install -Name $_.Name -Version $_.Version
-
+    NuGet-Install -Name $_.Name -Version $_.Version
     }
